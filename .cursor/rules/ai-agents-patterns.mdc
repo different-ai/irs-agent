@@ -1,0 +1,42 @@
+---
+description: To understand how to use ai vercel sdk
+globs: 
+---
+u give the final answer, provide an explanation for how you got it.',
+  prompt:
+    'A taxi driver earns $9461 per 1-hour work. ' +
+    'If he works 12 hours a day and in 1 hour he uses 14-liters petrol with price $134 for 1-liter. ' +
+    'How much money does he earn in one day?',
+});
+
+console.log(`FINAL TOOL CALLS: ${JSON.stringify(toolCalls, null, 2)}`);
+You can also use the experimental_output setting for generateText to generate structured outputs.
+
+Accessing all steps
+Calling generateText with maxSteps can result in several calls to the LLM (steps). You can access information from all steps by using the steps property of the response.
+
+
+import { generateText } from 'ai';
+
+const { steps } = await generateText({
+  model: openai('gpt-4o'),
+  maxSteps: 10,
+  // ...
+});
+
+// extract all tool calls from the steps:
+const allToolCalls = steps.flatMap(step => step.toolCalls);
+Getting notified on each completed step
+You can use the onStepFinish callback to get notified on each completed step. It is triggered when a step is finished, i.e. all text deltas, tool calls, and tool results for the step are available.
+
+
+import { generateText } from 'ai';
+
+const result = await generateText({
+  model: yourModel,
+  maxSteps: 10,
+  onStepFinish({ text, toolCalls, toolResults, finishReason, usage }) {
+    // your own logic, e.g. for saving the chat history or recording usage
+  },
+  // ...
+});
