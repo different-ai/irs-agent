@@ -1,43 +1,85 @@
-// Modules to control application life and create native browser window
-const { app, BrowserWindow } = require('electron')
-const path = require('node:path')
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const fs = require('fs/promises');
+const path = require('path');
 
-function createWindow () {
-  // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
+// Enable WebGPU for local LLM processing
+app.commandLine.appendSwitch('enable-unsafe-webgpu', 'true');
+
+class MarkdownProcessor {
+  constructor(window) {
+    this.window = window;
+  }
+
+  async readMarkdownFile(filePath) {
+    try {
+      const content = await fs.readFile(filePath, 'utf8');
+      return content;
+    } catch (error) {
+      console.error('Failed to read markdown file:', error);
+      throw error;
     }
-  })
+  }
 
-  // and load the index.html of the app.
-  mainWindow.loadFile('index.html')
+  async processMarkdown(content) {
+    // Send to renderer for UI generation
+    this.window.webContents.send('process-markdown', content);
+  }
 
-  // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+  async handleFileOpen() {
+    const result = await dialog.showOpenDialog(this.window, {
+      properties: ['openFile'],
+      filters: [{ name: 'Markdown', extensions: ['md', 'markdown'] }]
+    });
+
+    if (!result.canceled && result.filePaths.length > 0) {
+      try {
+        const content = await this.readMarkdownFile(result.filePaths[0]);
+        await this.processMarkdown(content);
+      } catch (error) {
+        console.error('Error processing file:', error);
+      }
+    }
+  }
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
-  createWindow()
+async function createWindow() {
+  const window = new BrowserWindow({
+    width: 1200,
+    height: 800,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      webSecurity: true,
+      webgl: true
+    },
+  });
 
-  app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
-})
+  const processor = new MarkdownProcessor(window);
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') app.quit()
-})
+  // Set up IPC handlers
+  ipcMain.on('open-file', () => processor.handleFileOpen());
+  ipcMain.on('ui-generated', (event, uiDescription) => {
+    console.log('UI generated:', uiDescription);
+    // Handle UI updates here
+  });
+  ipcMain.on('ui-generation-error', (event, error) => {
+    console.error('UI generation error:', error);
+    dialog.showErrorBox('Error', `Failed to generate UI: ${error}`);
+  });
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+  await window.loadFile('index.html');
+}
+
+app.whenReady().then(createWindow);
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+});
+
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  }
+});
