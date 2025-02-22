@@ -1,27 +1,38 @@
-import { unified } from 'unified';
-import remarkParse from 'remark-parse';
-import { fromMarkdown } from 'mdast-util-from-markdown';
-import { toString } from 'mdast-util-to-string';
+const { unified } = require('unified');
+const remarkParse = require('remark-parse');
+const { fromMarkdown } = require('mdast-util-from-markdown');
+const { toString } = require('mdast-util-to-string');
 
-export interface MarkdownNode {
-  type: string;
-  content?: string;
-  children?: MarkdownNode[];
-  metadata?: Record<string, any>;
-  depth?: number;
-  ordered?: boolean;
-  checked?: boolean;
-  lang?: string;
-}
+/**
+ * @typedef {Object} MarkdownNode
+ * @property {string} type
+ * @property {string} [content]
+ * @property {MarkdownNode[]} [children]
+ * @property {Object.<string, any>} [metadata]
+ * @property {number} [depth]
+ * @property {boolean} [ordered]
+ * @property {boolean} [checked]
+ * @property {string} [lang]
+ */
 
-export async function parseMarkdown(content: string): Promise<MarkdownNode[]> {
+/**
+ * Parse markdown content into a structured AST
+ * @param {string} content 
+ * @returns {Promise<MarkdownNode[]>}
+ */
+async function parseMarkdown(content) {
   const ast = fromMarkdown(content);
   return processNodes(ast.children);
 }
 
-function processNodes(nodes: any[]): MarkdownNode[] {
+/**
+ * Process AST nodes recursively
+ * @param {any[]} nodes 
+ * @returns {MarkdownNode[]}
+ */
+function processNodes(nodes) {
   return nodes.map(node => {
-    const baseNode: MarkdownNode = {
+    const baseNode = {
       type: node.type,
     };
 
@@ -72,3 +83,7 @@ function processNodes(nodes: any[]): MarkdownNode[] {
     }
   });
 }
+
+module.exports = {
+  parseMarkdown
+};

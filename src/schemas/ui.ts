@@ -1,7 +1,7 @@
-import { z } from 'zod';
+const { z } = require('zod');
 
 // Schema for UI/UX recommendations
-export const uiRecommendationSchema = z.object({
+const uiRecommendationSchema = z.object({
   recommendations: z.array(z.object({
     type: z.string(),
     reason: z.string(),
@@ -11,7 +11,7 @@ export const uiRecommendationSchema = z.object({
 });
 
 // Schema for UI components
-export const uiComponentSchema = z.discriminatedUnion("type", [
+const uiComponentSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("text"),
     content: z.string(),
@@ -42,10 +42,12 @@ export const uiComponentSchema = z.discriminatedUnion("type", [
   }),
 ]);
 
-export const astSchema = z.object({
+const astSchema = z.object({
   ast: z.array(uiComponentSchema),
 });
 
-export type UIRecommendation = z.infer<typeof uiRecommendationSchema>;
-export type UIComponent = z.infer<typeof uiComponentSchema>;
-export type AST = z.infer<typeof astSchema>;
+module.exports = {
+  uiRecommendationSchema,
+  uiComponentSchema,
+  astSchema,
+};

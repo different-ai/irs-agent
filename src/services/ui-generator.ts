@@ -1,14 +1,10 @@
-import { BrowserAI } from '@browserai/browserai';
-import type { MarkdownNode } from '../utils/markdown-parser';
-import type { UIRecommendation, AST } from '../schemas/ui';
-import { uiRecommendationSchema, astSchema } from '../schemas/ui';
+const { BrowserAI } = require('@browserai/browserai');
+const { uiRecommendationSchema, astSchema } = require('../schemas/ui');
 
-export class UIGenerator {
-  private browserAI: BrowserAI;
-  private modelLoaded: boolean = false;
-
+class UIGenerator {
   constructor() {
     this.browserAI = new BrowserAI();
+    this.modelLoaded = false;
   }
 
   async initialize() {
@@ -22,7 +18,7 @@ export class UIGenerator {
     }
   }
 
-  async getUIRecommendations(markdown: string): Promise<UIRecommendation> {
+  async getUIRecommendations(markdown) {
     if (!this.modelLoaded) {
       throw new Error('Model not loaded');
     }
@@ -58,7 +54,7 @@ provide structured recommendations following this format:
     }
   }
 
-  async generateUIComponents(nodes: MarkdownNode[], recommendations: UIRecommendation): Promise<AST> {
+  async generateUIComponents(nodes, recommendations) {
     if (!this.modelLoaded) {
       throw new Error('Model not loaded');
     }
@@ -91,3 +87,7 @@ generate an AST of UI components that implements these recommendations while pre
     }
   }
 }
+
+module.exports = {
+  UIGenerator
+};
