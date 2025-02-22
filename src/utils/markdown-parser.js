@@ -33,7 +33,7 @@ async function parseMarkdown(content) {
 function processNodes(nodes) {
   return nodes.map(node => {
     const baseNode = {
-      type: node.type,
+      type: node.type
     };
 
     switch (node.type) {
@@ -41,20 +41,20 @@ function processNodes(nodes) {
         return {
           ...baseNode,
           content: toString(node),
-          depth: node.depth,
+          depth: node.depth
         };
 
       case 'paragraph':
         return {
           ...baseNode,
-          content: toString(node),
+          content: toString(node)
         };
 
       case 'list':
         return {
           ...baseNode,
           ordered: node.ordered,
-          children: processNodes(node.children),
+          children: processNodes(node.children)
         };
 
       case 'listItem':
@@ -62,21 +62,21 @@ function processNodes(nodes) {
           ...baseNode,
           content: toString(node),
           checked: node.checked,
-          children: node.children ? processNodes(node.children) : undefined,
+          children: node.children ? processNodes(node.children) : undefined
         };
 
       case 'code':
         return {
           ...baseNode,
           content: node.value,
-          lang: node.lang,
+          lang: node.lang
         };
 
       default:
         if (node.children) {
           return {
             ...baseNode,
-            children: processNodes(node.children),
+            children: processNodes(node.children)
           };
         }
         return baseNode;

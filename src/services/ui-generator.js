@@ -1,6 +1,10 @@
 const { BrowserAI } = require('@browserai/browserai');
 const { uiRecommendationSchema, astSchema } = require('../schemas/ui');
 
+/**
+ * @typedef {import('../utils/markdown-parser').MarkdownNode} MarkdownNode
+ */
+
 class UIGenerator {
   constructor() {
     this.browserAI = new BrowserAI();
@@ -18,6 +22,11 @@ class UIGenerator {
     }
   }
 
+  /**
+   * Generate UI recommendations from markdown content
+   * @param {string} markdown 
+   * @returns {Promise<import('../schemas/ui').UIRecommendation>}
+   */
   async getUIRecommendations(markdown) {
     if (!this.modelLoaded) {
       throw new Error('Model not loaded');
@@ -54,6 +63,12 @@ provide structured recommendations following this format:
     }
   }
 
+  /**
+   * Generate UI components from markdown nodes and recommendations
+   * @param {MarkdownNode[]} nodes 
+   * @param {import('../schemas/ui').UIRecommendation} recommendations 
+   * @returns {Promise<import('../schemas/ui').AST>}
+   */
   async generateUIComponents(nodes, recommendations) {
     if (!this.modelLoaded) {
       throw new Error('Model not loaded');
@@ -67,7 +82,7 @@ ${JSON.stringify(recommendations, null, 2)}
 
 based on these recommendations, convert the following markdown nodes into appropriate UI components:
 
-${nodes.map(node => JSON.stringify(node, null, 2)).join("\n\n")}
+${nodes.map(node => JSON.stringify(node, null, 2)).join('\n\n')}
 
 generate an AST of UI components that implements these recommendations while preserving the document's structure and meaning.
 `;
