@@ -50,7 +50,7 @@ export function FinancialActivityTab() {
   useEffect(() => {
     // Initialize detector with API key from environment
     console.log('settings', settings);
-    const apiKey = settings.settingsopenaiApiKey;
+    const apiKey = settings.settings.openaiApiKey;
     if (apiKey && !detector) {
       console.log('initializing detector');
       const newDetector = new FinancialActivityDetector(apiKey);

@@ -1,7 +1,6 @@
 "use client";
 import { pipe } from "@screenpipe/browser";
 import { useState } from "react";
-import { interpretSearch } from "./action";
 
 const searchScreenpipe = async (q: string) => {
   const results = await pipe.queryScreenpipe({
