@@ -1,14 +1,27 @@
 "use client";
 
 import React from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RealTimeTab } from "@/components/real-time-tab";
+import { FinancialActivityTab } from "@/components/financial-activity-tab";
 
 export default function Page() {
   return (
     <div className="flex justify-center max-w-5xl mx-auto w-full mt-10">
-      <div className="w-full">
-        <RealTimeTab />
-      </div>
+      <Tabs defaultValue="financial" className="w-full">
+        <TabsList>
+          <TabsTrigger value="financial">Financial Activities</TabsTrigger>
+          <TabsTrigger value="realtime">Real-Time Monitor</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="financial">
+          <FinancialActivityTab />
+        </TabsContent>
+        
+        <TabsContent value="realtime">
+          <RealTimeTab />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

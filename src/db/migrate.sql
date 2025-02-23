@@ -4,6 +4,7 @@ CREATE EXTENSION IF NOT EXISTS vector;
 -- Drop existing tables if they exist
 DROP TABLE IF EXISTS classified_items;
 DROP TABLE IF EXISTS agent_steps;
+DROP TABLE IF EXISTS support_docs;
 
 -- Create classified_items table with vector support
 CREATE TABLE classified_items (
@@ -37,4 +38,15 @@ CREATE TABLE agent_steps (
   tool_results JSONB,
   usage JSONB,
   finish_reason TEXT
+);
+
+-- Create support_docs table
+CREATE TABLE IF NOT EXISTS support_docs (
+  id SERIAL PRIMARY KEY,
+  timestamp TIMESTAMP NOT NULL,
+  summary TEXT NOT NULL,
+  key_points JSONB NOT NULL,
+  recommended_actions JSONB NOT NULL,
+  timeframe JSONB NOT NULL,
+  raw_data JSONB
 ); 

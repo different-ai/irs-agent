@@ -24,6 +24,8 @@ export async function initDB() {
       -- Drop existing tables if they exist
       DROP TABLE IF EXISTS classified_items;
       DROP TABLE IF EXISTS agent_steps;
+      DROP TABLE IF EXISTS support_docs;
+      DROP TABLE IF EXISTS financial_activities;
 
       -- Create classified_items table
       CREATE TABLE classified_items (
@@ -59,6 +61,34 @@ export async function initDB() {
         tool_results JSONB,
         usage JSONB,
         finish_reason TEXT
+      );
+
+      -- Create support_docs table
+      CREATE TABLE support_docs (
+        id SERIAL PRIMARY KEY,
+        timestamp TIMESTAMP NOT NULL,
+        summary TEXT NOT NULL,
+        key_points JSONB NOT NULL,
+        recommended_actions JSONB NOT NULL,
+        timeframe JSONB NOT NULL,
+        raw_data JSONB
+      );
+
+      -- Create financial_activities table
+      CREATE TABLE financial_activities (
+        id SERIAL PRIMARY KEY,
+        timestamp TIMESTAMP NOT NULL,
+        type TEXT NOT NULL,
+        amount NUMERIC NOT NULL,
+        currency TEXT NOT NULL,
+        description TEXT NOT NULL,
+        sender_name TEXT,
+        receiver_name TEXT,
+        confidence NUMERIC NOT NULL,
+        source_text TEXT NOT NULL,
+        source_type TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW(),
+        metadata JSONB
       );
     `);
     

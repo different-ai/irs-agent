@@ -1,4 +1,4 @@
-import { pgTable, serial, text, boolean, timestamp, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, boolean, timestamp, jsonb, numeric } from 'drizzle-orm/pg-core';
 
 // Table for classified items
 export const classifiedItems = pgTable('classified_items', {
@@ -39,4 +39,21 @@ export const supportDocs = pgTable('support_docs', {
   recommendedActions: jsonb('recommended_actions').notNull(),
   timeframe: jsonb('timeframe').notNull(), // Store start and end time
   rawData: jsonb('raw_data'), // Store the original data used to generate the doc
+});
+
+// New table for financial activities
+export const financialActivities = pgTable('financial_activities', {
+  id: serial('id').primaryKey(),
+  timestamp: timestamp('timestamp').notNull(),
+  type: text('type').notNull(), // 'invoice', 'payment', 'receipt', 'subscription'
+  amount: numeric('amount').notNull(),
+  currency: text('currency').notNull(),
+  description: text('description').notNull(),
+  senderName: text('sender_name'),
+  receiverName: text('receiver_name'),
+  confidence: numeric('confidence').notNull(),
+  sourceText: text('source_text').notNull(),
+  sourceType: text('source_type').notNull(), // e.g., 'audio', 'ocr', etc.
+  createdAt: timestamp('created_at').defaultNow(),
+  metadata: jsonb('metadata'), // Optional field for additional data
 }); 

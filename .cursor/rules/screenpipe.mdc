@@ -1,0 +1,173 @@
+---
+description: How to use screenpipe things like ocr sse etc
+globs: 
+---
+here’s an amazing ai guide on how to use screenpipe’s javascript sdk. this guide covers both the node.js and browser packages, explains installation, basic usage, realtime streams, input control, notifications, node.js-specific features, types, error handling, and examples.
+
+installation
+	•	for node.js, run:
+npm install @screenpipe/js
+	•	for browser, run:
+npm install @screenpipe/browser
+
+basic usage
+	•	in a node.js environment, import the sdk with:
+
+import { pipe } from '@screenpipe/js'
+
+
+	•	in a browser environment, import it like this:
+
+import { pipe } from '@screenpipe/browser'
+
+search api
+
+use the search api to query screenpipe’s content. here’s an example:
+
+const results = await pipe.queryScreenpipe({
+  q: "meeting notes",
+  contentType: "ocr", // valid options: "ocr", "audio", "ui", "all", "audio+ui", "ocr+ui", "audio+ocr"
+  limit: 10,
+  offset: 0,
+  startTime: "2024-03-10t12:00:00z",
+  endTime: "2024-03-10t13:00:00z",
+  appName: "chrome",
+  windowName: "meeting",
+  includeFrames: true,
+  minLength: 10,
+  maxLength: 1000,
+  speakerIds: [1, 2],
+  frameName: "screenshot.png"
+})
+
+input control api
+
+simulate user actions with the input control api:
+	•	type text:
+
+await pipe.input.type("hello world")
+
+
+	•	press a key:
+
+await pipe.input.press("enter")
+
+
+	•	move the mouse:
+
+await pipe.input.moveMouse(100, 200)
+
+
+	•	click:
+
+await pipe.input.click("left") // options: "left", "right", "middle"
+
+realtime streams
+
+streaming transcriptions
+
+stream live transcription data like this:
+
+for await (const chunk of pipe.streamTranscriptions()) {
+  console.log(chunk.choices[0].text)
+  console.log(chunk.metadata) // includes timestamp, device, isInput
+}
+
+streaming vision events
+
+stream vision events, optionally with images:
+
+for await (const event of pipe.streamVision(true)) { // pass true to include images
+  console.log(event.data.text)
+  console.log(event.data.app_name)
+  console.log(event.data.image) // image is base64 encoded if includeImages is true
+}
+
+desktop notifications
+
+send desktop notifications with custom actions:
+
+await pipe.sendDesktopNotification({
+  title: "meeting starting",
+  body: "your standup begins in 5 minutes",
+  actions: [
+    {
+      id: "join",
+      label: "join meeting"
+    }
+  ],
+  timeout: 5000,
+  persistent: false
+})
+
+node.js-specific features
+
+the node sdk offers extra functionality not available in the browser.
+
+settings management
+	•	get current settings:
+
+const settings = await pipe.settings.getAll()
+
+
+	•	update settings:
+
+await pipe.settings.update({ aiModel: "gpt-4" })
+
+
+
+inbox management
+	•	get messages:
+
+const messages = await pipe.inbox.getMessages()
+
+
+	•	clear messages:
+
+await pipe.inbox.clearMessages()
+
+typescript types
+
+both sdk packages export comprehensive typescript types for enhanced type safety. for example:
+
+import type {
+  contentType,
+  screenpipeQueryParams,
+  screenpipeResponse,
+  ocrContent,
+  audioContent,
+  uiContent,
+  speaker,
+  notificationOptions,
+  settings
+} from '@screenpipe/js' // or '@screenpipe/browser'
+
+key types include:
+	•	contentType: “all” | “ocr” | “audio” | “ui” | “audio+ui” | “ocr+ui” | “audio+ocr”
+	•	screenpipeQueryParams: an interface containing parameters like q, contentType, limit, offset, startTime, endTime, appName, windowName, includeFrames, minLength, maxLength, speakerIds, frameName
+	•	screenpipeResponse: includes data (an array of content items) and pagination details
+
+error handling
+
+wrap your sdk calls in try-catch blocks to catch and handle errors. for instance:
+
+try {
+  const results = await pipe.queryScreenpipe({
+    q: "meeting",
+    contentType: "ocr"
+  })
+} catch (error) {
+  console.error("screenpipe api error:", error)
+}
+
+examples
+
+check out the following production examples for real-world usage of the sdk:
+	•	data visualization pipe
+	•	linkedin ai assistant
+	•	meeting summarizer
+	•	memories gallery
+	•	obsidian integration
+	•	search interface
+
+this guide gives you a comprehensive overview of how to install, configure, and use screenpipe’s javascript sdk in your projects. happy coding!

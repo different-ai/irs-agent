@@ -1,6 +1,7 @@
 import './globals.css';
 import { Inter } from 'next/font/google';
 import { DatabaseProvider } from '@/components/providers/database-provider';
+import { DatabaseInitializer } from './components/db-initializer';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -17,6 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        <DatabaseInitializer />
         <DatabaseProvider>
           {children}
         </DatabaseProvider>
