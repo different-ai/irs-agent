@@ -16,10 +16,9 @@ irs agent silently observes your screen, capturing both visual and audio cues in
 
 1. **installation:**  
    clone the repository and install the dependencies with your preferred package manager. make sure to configure your openai api key and other environment variables as needed.
-
 2. **running the project:**  
    start the next.js development server, and irs agent will immediately begin monitoring your screen and logging tax documents in real time.
-4. **reviewing logs:**  
+3. **reviewing logs:**  
    visit the financial activity tab to view detailed logs of every detected event and review the extracted financial details.
 
 ## contributing
@@ -28,6 +27,6 @@ contributions are welcome. if you have ideas to enhance irs agent's capabilities
 
 ## license
 
-this project is open source. please refer to the license file in the repository for further details.
+this project is open source.
 
 enjoy the seamless experience of managing your tax documents with irs agent, the ai watchdog that makes sure every receipt and invoice is captured.
