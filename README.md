@@ -1,66 +1,33 @@
-# Transform your $20 Cursor into a Devin-like AI Assistant
+# irs agent: an obtrusive ai screen-watcher for your tax documents
 
-This repository gives you everything needed to supercharge your Cursor or Windsurf IDE with **advanced** agentic AI capabilities—similar to the $500/month Devin—but at a fraction of the cost. In under a minute, you'll gain:
+irs agent is an ai-powered agent that never takes a break. it constantly watches your screen to capture receipts, invoices, and all your tax documents as soon as they appear. by combining cutting-edge ocr, audio transcription, and ui event detection, this agent extracts key details like amounts, currencies, names, and timestamps, creating a complete record of your financial interactions.
 
-* Automated planning and self-evolution, so your AI "thinks before it acts" and learns from mistakes
-* Extended tool usage, including web browsing, search engine queries, and LLM-driven text/image analysis
-* [Experimental] Multi-agent collaboration, with o1 doing the planning, and regular Claude/GPT-4o doing the execution.
+## overview
 
-## Why This Matters
+irs agent silently observes your screen, capturing both visual and audio cues in real time using [Screenpipe](https://docs.screenpi.pe) - an open-source screen and audio capture framework. Screenpipe provides 24/7 local media capture capabilities, ensuring all data stays private and secure on your machine. whether you're checking emails, browsing invoices, or finalizing a payment, it identifies and logs financial activities automatically. designed to be obtrusive, it ensures no tax document slips through unnoticed.
 
-Devin impressed many by acting like an intern who writes its own plan, updates that plan as it progresses, and even evolves based on your feedback. But you don't need Devin's $500/month subscription to get most of that functionality. By customizing the .cursorrules file, plus a few Python scripts, you'll unlock the same advanced features inside Cursor.
+## core features
 
-## Key Highlights
+- real-time monitoring that continuously grabs ocr, audio, and ui events
+- an automated detector powered by openai models that extracts essential details from your financial documents
+- comprehensive logging of every captured event in a secure local database for later review
+- fully customizable settings, letting you adjust your openai api key and tailor prompt templates to your specific workflow
 
-1.	Easy Setup
-   
-   Two ways to get started:
 
-   **Option 1: Using Cookiecutter (Recommended)**
-   ```bash
-   # Install cookiecutter if you haven't
-   pip install cookiecutter
+1. **installation:**  
+   clone the repository and install the dependencies with your preferred package manager. make sure to configure your openai api key and other environment variables as needed.
 
-   # Create a new project
-   cookiecutter gh:grapeot/devin.cursorrules --checkout template
-   ```
+2. **running the project:**  
+   start the next.js development server, and irs agent will immediately begin monitoring your screen and logging tax documents in real time.
+4. **reviewing logs:**  
+   visit the financial activity tab to view detailed logs of every detected event and review the extracted financial details.
 
-   **Option 2: Manual Setup**
-   Copy the provided config files into your project folder. Cursor users only need the .cursorrules file.
+## contributing
 
-2.	Planner-Executor Multi-Agent (Experimental)
+contributions are welcome. if you have ideas to enhance irs agent's capabilities or performance, please open an issue or submit a pull request. make sure your code follows the project's style guidelines and includes the necessary tests.
 
-   Our new [multi-agent branch](https://github.com/grapeot/devin.cursorrules/tree/multi-agent) introduces a high-level Planner (powered by o1) that coordinates complex tasks, and an Executor (powered by Claude/GPT) that implements step-by-step actions. This two-agent approach drastically improves solution quality, cross-checking, and iteration speed.
+## license
 
-3.	Extended Toolset
+this project is open source. please refer to the license file in the repository for further details.
 
-   Includes:
-   
-   * Web scraping (Playwright)
-   * Search engine integration (DuckDuckGo)
-   * LLM-powered analysis
-
-   The AI automatically decides how and when to use them (just like Devin).
-
-   Note: For screenshot verification features, Playwright browsers will be installed automatically when you first use the feature.
-
-4.	Self-Evolution
-
-   Whenever you correct the AI, it can update its "lessons learned" in .cursorrules. Over time, it accumulates project-specific knowledge and gets smarter with each iteration. It makes AI a coachable and coach-worthy partner.
-	
-## Usage
-
-1. Choose your setup method:
-   - **Cookiecutter (Recommended)**: Follow the prompts after running the cookiecutter command
-   - **Manual**: Copy the files you need from this repository
-
-2. Configure your environment:
-   - Set up your API keys (optional)
-
-3. Start exploring advanced tasks—such as data gathering, building quick prototypes, or cross-referencing external resources—in a fully agentic manner.
-
-## Want the Details?
-
-Check out our [blog post](https://yage.ai/cursor-to-devin-en.html) on how we turned $20 into $500-level AI capabilities in just one hour. It explains the philosophy behind process planning, self-evolution, and fully automated workflows. You'll also find side-by-side comparisons of Devin, Cursor, and Windsurf, plus a step-by-step tutorial on setting this all up from scratch.
-
-License: MIT
+enjoy the seamless experience of managing your tax documents with irs agent, the ai watchdog that makes sure every receipt and invoice is captured.
