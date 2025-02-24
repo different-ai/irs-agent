@@ -1,4 +1,6 @@
-# irs agent: an obtrusive ai screen-watcher for your tax documents
+# irs agent
+
+> your least favorite agent now powered by ai
 
 irs agent is an ai-powered agent that never takes a break. it constantly watches your screen to capture receipts, invoices, and all your tax documents as soon as they appear. by combining cutting-edge ocr, audio transcription, and ui event detection, this agent extracts key details like amounts, currencies, names, and timestamps, creating a complete record of your financial interactions.
 
@@ -9,7 +11,6 @@ irs agent is an ai-powered agent that never takes a break. it constantly watches
 - [x] Wathces every single transaction you make and stores it in local db
 - [ ] Actually does your taxes
 
-> Created at the lofi hackathoni in SF, using local-first technology like pglite, screenpipe, and ollama.
 
 ## overview
 
