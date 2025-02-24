@@ -10,6 +10,10 @@ irs agent is an ai-powered agent that never takes a break. it constantly watches
 
 irs agent silently observes your screen, capturing both visual and audio cues in real time using [Screenpipe](https://docs.screenpi.pe) - an open-source screen and audio capture framework. Screenpipe provides 24/7 local media capture capabilities, ensuring all data stays private and secure on your machine. whether you're checking emails, browsing invoices, or finalizing a payment, it identifies and logs financial activities automatically. designed to be obtrusive, it ensures no tax document slips through unnoticed.
 
+## how it works
+![image](https://github.com/user-attachments/assets/6b39b487-76f0-44c9-a40f-a4a4c9d6aa26)
+
+
 ## core features
 
 - real-time monitoring that continuously grabs ocr, audio, and ui events
