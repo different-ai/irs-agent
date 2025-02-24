@@ -4,6 +4,11 @@ irs agent is an ai-powered agent that never takes a break. it constantly watches
 
 <img width="1840" alt="Screenshot 2025-02-23 at 16 37 53" src="https://github.com/user-attachments/assets/00e41c9f-ac98-4ba6-99b2-dc4e735f3a14" />
 
+## current capabilities
+
+- [x] Wathces every single transaction you make and stores it in local db
+- [ ] Actually does your taxes
+
 > Created at the lofi hackathoni in SF, using local-first technology like pglite, screenpipe, and ollama.
 
 ## overview
