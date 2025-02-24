@@ -8,7 +8,8 @@ irs agent is an ai-powered agent that never takes a break. it constantly watches
 
 ## current capabilities
 
-- [x] Wathces every single transaction you make and stores it in local db
+- [x] Watches every single transaction you make and stores it in local db
+- [ ] Local-first
 - [ ] Actually does your taxes
 
 
