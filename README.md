@@ -13,6 +13,12 @@ irs agent silently observes your screen, capturing both visual and audio cues in
 ## how it works
 ![image](https://github.com/user-attachments/assets/6b39b487-76f0-44c9-a40f-a4a4c9d6aa26)
 
+## requirements
+
+- screenpipe
+- ollama + phi4
+
+
 
 ## core features
 
