@@ -1,5 +1,5 @@
 import { pipe } from '@screenpipe/browser';
-import { createOpenAI } from '@ai-sdk/openai';
+import { createOllama, ollama } from 'ollama-ai-provider';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { db } from '@/db';
@@ -16,15 +16,15 @@ const FINANCIAL_KEYWORDS = {
 
 // Schema for financial activity detection
 const financialActivitySchema = z.object({
-  type: z.enum(['invoice', 'payment', 'receipt', 'subscription']),
-  amount: z.number(),
-  currency: z.string(),
-  description: z.string(),
+  type: z.enum(['invoice', 'payment', 'receipt', 'subscription']).nullable(),
+  amount: z.number().nullable(),
+  currency: z.string().nullable(),
+  description: z.string().nullable(),
   senderName: z.string().nullable(),
   receiverName: z.string().nullable(),
-  confidence: z.number(),
-  sourceText: z.string(),
-  sourceType: z.string()
+  confidence: z.number().nullable(),
+  sourceText: z.string().nullable(),
+  sourceType: z.string().nullable()
 });
 
 interface VisionEvent {
@@ -37,14 +37,14 @@ interface VisionEvent {
 }
 
 export class FinancialActivityDetector extends EventEmitter {
-  private openai: ReturnType<typeof createOpenAI>;
+  private openai: ReturnType<typeof createOllama>;
   private isRunning = false;
   private debugMode: boolean;
   private processingCount = 0;
 
   constructor(apiKey: string, debugMode = process.env.NODE_ENV === 'development') {
     super();
-    this.openai = createOpenAI({ apiKey });
+    this.openai = createOllama();
     this.debugMode = debugMode;
   }
 
@@ -80,7 +80,7 @@ export class FinancialActivityDetector extends EventEmitter {
 
       this.log('Generating structured information using LLM');
       const { object: activity } = await generateObject({
-        model: this.openai('o3-mini'),
+        model: ollama('phi4'),
         schema: financialActivitySchema,
         prompt: `Extract financial activity information from this text:
 "${text}"
