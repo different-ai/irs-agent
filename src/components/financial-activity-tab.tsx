@@ -5,9 +5,10 @@ import { db } from '@/db';
 import { financialActivities } from '@/db/schema';
 import { desc } from 'drizzle-orm';
 import * as Accordion from '@radix-ui/react-accordion';
-import { ChevronDown, DollarSign } from 'lucide-react';
+import { ChevronDown, DollarSign, Loader2 } from 'lucide-react';
 import { FinancialActivityDetector } from '@/services/financial-activity-detector';
 import { useSettings } from '@/hooks/use-settings';
+import { useToast } from '@/components/ui/use-toast';
 
 interface FinancialActivity {
   id: number;
@@ -44,41 +45,83 @@ export function FinancialActivityTab() {
   const [activities, setActivities] = useState<FinancialActivity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [detector, setDetector] = useState<FinancialActivityDetector | null>(null);
-  // get settings
+  const [isDetectorRunning, setIsDetectorRunning] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingCount, setProcessingCount] = useState(0);
   const settings = useSettings();
+  const { toast } = useToast();
+
+  const loadActivities = async () => {
+    const items = await db
+      .select()
+      .from(financialActivities)
+      .orderBy(desc(financialActivities.timestamp))
+      .limit(50);
+
+    setActivities(items);
+    setIsLoading(false);
+  };
 
   useEffect(() => {
-    // Initialize detector with API key from environment
-    console.log('settings', settings);
-    const apiKey = settings.settings.openaiApiKey || process.env.OPENAI_API_KEY;
-    if (apiKey && !detector) {
-      console.log('initializing detector');
+    const apiKey = settings.settings.openaiApiKey || process.env.NEXT_PUBLIC_OPENAI_API_KEY;
+
+    if (!apiKey) {
+      toast({
+        variant: "destructive",
+        title: "API Key Missing",
+        description: "OpenAI API key is not set. Financial activity detection will not work.",
+      });
+      return;
+    }
+
+    if (!detector) {
       const newDetector = new FinancialActivityDetector(apiKey);
+      
+      // Set up event listeners
+      newDetector.on('stateChange', ({ isRunning }) => {
+        setIsDetectorRunning(isRunning);
+        if (isRunning) {
+          toast({
+            title: "Detector Started",
+            description: "Now monitoring for financial activities...",
+          });
+        }
+      });
+
+      newDetector.on('processingStateChange', ({ isProcessing, count }) => {
+        setIsProcessing(isProcessing);
+        setProcessingCount(count);
+      });
+
+      newDetector.on('activityDetected', (activity) => {
+        toast({
+          title: "New Activity Detected",
+          description: `${activity.type}: ${activity.amount} ${activity.currency}`,
+        });
+        loadActivities();
+      });
+
+      newDetector.on('error', (error) => {
+        toast({
+          variant: "destructive",
+          title: "Detection Error",
+          description: "An error occurred while processing financial activities.",
+        });
+        console.error('Detector error:', error);
+      });
+
       setDetector(newDetector);
       newDetector.start().catch(console.error);
     }
 
     return () => {
-      // Cleanup: stop detector when component unmounts
       detector?.stop();
+      detector?.removeAllListeners();
     };
-  }, [detector]);
+  }, [detector, settings.settings.openaiApiKey, toast]);
 
   useEffect(() => {
-    async function loadActivities() {
-      const items = await db
-        .select()
-        .from(financialActivities)
-        .orderBy(desc(financialActivities.timestamp))
-        .limit(50);
-
-      setActivities(items);
-      setIsLoading(false);
-    }
-
     loadActivities();
-
-    // Set up periodic refresh
     const intervalId = setInterval(loadActivities, 5000);
     return () => clearInterval(intervalId);
   }, []);
@@ -100,10 +143,39 @@ export function FinancialActivityTab() {
   return (
     <div className="bg-white shadow rounded-lg">
       <div className="px-4 py-5 border-b border-gray-200">
-        <h3 className="text-lg font-medium text-gray-900">Financial Activities</h3>
-        <p className="mt-1 text-sm text-gray-500">
-          Automatically tracked financial events from your conversations
-        </p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h3 className="text-lg font-medium text-gray-900">Financial Activities</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Automatically tracked financial events from your conversations
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            {isProcessing && (
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Processing {processingCount} items...</span>
+              </div>
+            )}
+            <button
+              onClick={() => detector?.[isDetectorRunning ? 'stop' : 'start']()}
+              disabled={!detector}
+              className={`px-4 py-2 rounded-md ${
+                !detector 
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : isDetectorRunning
+                  ? "bg-red-500 hover:bg-red-600"
+                  : "bg-green-500 hover:bg-green-600"
+              } text-white`}
+            >
+              {!detector 
+                ? "API Key Required"
+                : isDetectorRunning 
+                ? "Stop Detector" 
+                : "Start Detector"}
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="divide-y divide-gray-200">

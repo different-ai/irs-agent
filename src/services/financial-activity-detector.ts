@@ -4,6 +4,7 @@ import { generateObject } from 'ai';
 import { z } from 'zod';
 import { db } from '@/db';
 import { financialActivities } from '@/db/schema';
+import { EventEmitter } from 'events';
 
 // Keywords to match for financial activities
 const FINANCIAL_KEYWORDS = {
@@ -26,19 +27,39 @@ const financialActivitySchema = z.object({
   sourceType: z.string()
 });
 
-export class FinancialActivityDetector {
+interface VisionEvent {
+  data: {
+    text: string;
+    app_name: string;
+    image?: string;
+    timestamp?: string;
+  }
+}
+
+export class FinancialActivityDetector extends EventEmitter {
   private openai: ReturnType<typeof createOpenAI>;
   private isRunning = false;
+  private debugMode: boolean;
+  private processingCount = 0;
 
-  constructor(apiKey: string) {
+  constructor(apiKey: string, debugMode = process.env.NODE_ENV === 'development') {
+    super();
     this.openai = createOpenAI({ apiKey });
+    this.debugMode = debugMode;
+  }
+
+  private log(message: string, ...args: unknown[]) {
+    if (this.debugMode) {
+      console.log('[FinancialActivityDetector]', message, ...args);
+    }
   }
 
   private containsFinancialKeywords(text: string): string | null {
-    console.log('containsFinancialKeywords', text);
+    this.log('Checking financial keywords in:', text);
     const lowerText = text.toLowerCase();
     for (const [type, keywords] of Object.entries(FINANCIAL_KEYWORDS)) {
       if (keywords.some(keyword => lowerText.includes(keyword))) {
+        this.log('Found keyword match:', type);
         return type;
       }
     }
@@ -46,12 +67,18 @@ export class FinancialActivityDetector {
   }
 
   private async processContent(text: string, type: string): Promise<void> {
-    console.log('processing content', text, type);
-    const keywordMatch = this.containsFinancialKeywords(text);
-    if (!keywordMatch) return;
-
+    this.processingCount++;
+    this.emit('processingStateChange', { isProcessing: true, count: this.processingCount });
+    
     try {
-      // Use LLM to extract structured information
+      this.log('Processing content:', { text, type });
+      const keywordMatch = this.containsFinancialKeywords(text);
+      if (!keywordMatch) {
+        this.log('No keyword match found, skipping');
+        return;
+      }
+
+      this.log('Generating structured information using LLM');
       const { object: activity } = await generateObject({
         model: this.openai('o3-mini'),
         schema: financialActivitySchema,
@@ -68,8 +95,10 @@ The text appears to be about a ${keywordMatch}. Extract the following:
 Only extract if you're confident this is a real financial activity.`
       });
 
-      // Store in database if confidence is high enough
+      this.log('LLM response:', activity);
+
       if (activity.confidence > 0.7) {
+        this.log('Confidence high enough, storing in database');
         await db.insert(financialActivities).values({
           timestamp: new Date(),
           type: activity.type,
@@ -83,62 +112,95 @@ Only extract if you're confident this is a real financial activity.`
           sourceType: type
         });
 
-        // Send notification
         await pipe.sendDesktopNotification({
           title: 'New Financial Activity Detected',
           body: `${activity.type}: ${activity.amount} ${activity.currency}`,
           timeout: 5000
         });
+        this.log('Notification sent');
+        this.emit('activityDetected', activity);
+      } else {
+        this.log('Confidence too low, skipping storage:', activity.confidence);
       }
     } catch (error) {
       console.error('Error processing financial activity:', error);
+      if (this.debugMode) {
+        console.error('Full error details:', error);
+      }
+      this.emit('error', error);
+    } finally {
+      this.processingCount--;
+      this.emit('processingStateChange', { 
+        isProcessing: this.processingCount > 0, 
+        count: this.processingCount 
+      });
     }
   }
 
   async start(): Promise<void> {
-    if (this.isRunning) return;
+    if (this.isRunning) {
+      this.log('Already running, skipping start');
+      return;
+    }
+    
     this.isRunning = true;
+    this.emit('stateChange', { isRunning: true });
+    this.log('Starting financial activity detector');
 
     try {
-      // Start audio stream
-      // const audioStream = pipe.streamTranscriptions();
-      // (async () => {
-      //   for await (const chunk of audioStream) {
-      //     if (!this.isRunning) break;
-      //     if (chunk.metadata?.timestamp && chunk.choices[0]?.text) {
-      //       await this.processContent(
-      //         chunk.choices[0].text,
-      //         'audio',
-      //         chunk.metadata.timestamp
-      //       );
-      //     }
-      //   }
-      // })().catch(console.error);
-
-      // Start OCR stream
-      console.log('starting vision stream');
+      this.log('Starting vision stream');
       const visionStream = pipe.streamVision(false);
-      console.log('vision stream', visionStream);
+      
       (async () => {
+        this.log('Beginning vision stream processing');
         for await (const event of visionStream) {
-          if (!this.isRunning) break;
-          // ignore app name includes cursor
-          if (event.data.Ocr.text ) {
+          if (!this.isRunning) {
+            this.log('Stopping vision stream processing');
+            break;
+          }
+
+          if (this.debugMode) {
+            this.log('Raw vision event:', JSON.stringify(event, null, 2));
+          }
+
+          const visionEvent = event as VisionEvent;
+          if (visionEvent.data.text) {
+            this.log('Processing vision event:', {
+              text: visionEvent.data.text,
+              appName: visionEvent.data.app_name,
+              timestamp: visionEvent.data.timestamp
+            });
+
             await this.processContent(
-              event.data.Ocr.text,
-              'ocr',
+              visionEvent.data.text,
+              'ocr'
             );
+          } else {
+            this.log('Skipping event - no text content');
           }
         }
-      })().catch(console.error);
+      })().catch(error => {
+        console.error('Vision stream error:', error);
+        if (this.debugMode) {
+          console.error('Full error details:', error);
+        }
+        this.emit('error', error);
+      });
 
     } catch (error) {
       console.error('Error starting financial activity detector:', error);
+      if (this.debugMode) {
+        console.error('Full error details:', error);
+      }
+      this.emit('error', error);
       this.isRunning = false;
+      this.emit('stateChange', { isRunning: false });
     }
   }
 
   stop(): void {
+    this.log('Stopping financial activity detector');
     this.isRunning = false;
+    this.emit('stateChange', { isRunning: false });
   }
 } 
