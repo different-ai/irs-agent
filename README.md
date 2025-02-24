@@ -2,6 +2,10 @@
 
 irs agent is an ai-powered agent that never takes a break. it constantly watches your screen to capture receipts, invoices, and all your tax documents as soon as they appear. by combining cutting-edge ocr, audio transcription, and ui event detection, this agent extracts key details like amounts, currencies, names, and timestamps, creating a complete record of your financial interactions.
 
+<img width="1840" alt="Screenshot 2025-02-23 at 16 37 53" src="https://github.com/user-attachments/assets/00e41c9f-ac98-4ba6-99b2-dc4e735f3a14" />
+
+> Created at the lofi hackathoni in SF, using local-first technology like pglite, screenpipe, and ollama.
+
 ## overview
 
 irs agent silently observes your screen, capturing both visual and audio cues in real time using [Screenpipe](https://docs.screenpi.pe) - an open-source screen and audio capture framework. Screenpipe provides 24/7 local media capture capabilities, ensuring all data stays private and secure on your machine. whether you're checking emails, browsing invoices, or finalizing a payment, it identifies and logs financial activities automatically. designed to be obtrusive, it ensures no tax document slips through unnoticed.
